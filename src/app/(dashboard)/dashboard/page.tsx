@@ -1,14 +1,9 @@
-﻿import React from 'react';
+import React from 'react';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
 import { db } from '@/lib/db';
 import { redirect } from 'next/navigation';
-import { DashboardHero } from '@/components/dashboard/overview/dashboard-hero';
-import { DashboardKpis } from '@/components/dashboard/overview/dashboard-kpis';
-import { DashboardNextMeeting } from '@/components/dashboard/overview/dashboard-next-meeting';
-import { DashboardEventGrid } from '@/components/dashboard/overview/dashboard-event-grid';
-import { DashboardUpcomingTimeline } from '@/components/dashboard/overview/dashboard-upcoming-timeline';
-import { DashboardQuickActions } from '@/components/dashboard/overview/dashboard-quick-actions';
+import { MasterDashboardOverview } from '@/components/dashboard/overview/master-dashboard-overview';
 
 export const metadata = {
   title: 'Dashboard | Calendio',
@@ -35,7 +30,7 @@ export default async function DashboardPage() {
           status: { in: ['CONFIRMED', 'RESCHEDULED'] },
         },
         orderBy: { startTime: 'asc' },
-        take: 6,
+        take: 10,
         include: { eventType: true },
       },
     },
@@ -51,44 +46,23 @@ export default async function DashboardPage() {
   ]);
 
   const username = user.profile?.username || user.email.split('@')[0];
-  const upcomingBookings = user.bookings || [];
-  const nextBooking = upcomingBookings.length > 0 ? upcomingBookings[0] : null;
+
+  const userData = {
+    id: user.id,
+    name: user.name,
+    email: user.email,
+    image: user.image,
+    timeZone: user.timeZone || 'Asia/Kolkata',
+    username,
+  };
 
   return (
-    <div className="max-w-7xl mx-auto space-y-8 pb-16 animate-fade-in">
-      {/* 1. Hero & Quick Share Header */}
-      <DashboardHero userName={user.name || 'Friend'} username={username} />
-
-      {/* 2. Key Metric Pulse Cards */}
-      <DashboardKpis
-        eventTypesCount={user.eventTypes.length}
-        upcomingCount={upcomingBookings.length}
-        contactsCount={contactsCount}
-        workflowsCount={workflowsCount}
-      />
-
-      {/* 3. Main 2-Column Section */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        {/* Left Column (8 cols): Next Up Spotlight + Event Grid */}
-        <div className="lg:col-span-8 space-y-8">
-          {/* Next Up Meeting Card */}
-          <DashboardNextMeeting nextBooking={nextBooking} />
-
-          {/* Event Types Showcase */}
-          <DashboardEventGrid
-            eventTypes={user.eventTypes}
-            username={username}
-          />
-        </div>
-
-        {/* Right Column (4 cols): Upcoming Timeline */}
-        <div className="lg:col-span-4 space-y-6">
-          <DashboardUpcomingTimeline bookings={upcomingBookings} />
-        </div>
-      </div>
-
-      {/* 4. Scheduling Power Tools / Ecosystem Launcher */}
-      <DashboardQuickActions />
-    </div>
+    <MasterDashboardOverview
+      user={userData}
+      eventTypes={user.eventTypes}
+      upcomingBookings={user.bookings || []}
+      contactsCount={contactsCount}
+      workflowsCount={workflowsCount}
+    />
   );
 }

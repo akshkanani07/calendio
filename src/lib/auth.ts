@@ -30,7 +30,7 @@ export const authOptions: NextAuthOptions = {
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) {
-          throw new Error("કૃપા કરીને ઇમેઇલ અને પાસવર્ડ દાખલ કરો.");
+          throw new Error("Please enter an email and password.");
         }
 
         const user = await db.user.findUnique({
@@ -39,7 +39,7 @@ export const authOptions: NextAuthOptions = {
         });
 
         if (!user || !user.password) {
-          throw new Error("આ ઇમેઇલ સાથે કોઈ એકાઉન્ટ મળ્યું નથી.");
+          throw new Error("Invalid email or password.");
         }
 
         const isPasswordValid = await bcrypt.compare(
@@ -48,7 +48,7 @@ export const authOptions: NextAuthOptions = {
         );
 
         if (!isPasswordValid) {
-          throw new Error("ખોટો પાસવર્ડ દાખલ કર્યો છે.");
+          throw new Error("Invalid email or password.");
         }
 
         return {

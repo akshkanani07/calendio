@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { getBookingByUid } from '@/app/actions/booking.actions';
@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Logo } from '@/components/shared/logo';
+import { db } from '@/lib/db';
 import {
   getGoogleCalendarUrl,
   getOutlookCalendarUrl,
@@ -27,14 +28,27 @@ export default async function BookingConfirmationPage({
   searchParams,
 }: {
   params: Promise<{ username: string; eventSlug: string }>;
-  searchParams: Promise<{ uid?: string }>;
+  searchParams: Promise<{ uid?: string; bookingId?: string }>;
 }) {
   const { username, eventSlug } = await params;
-  const { uid } = await searchParams;
+  const sParams = await searchParams;
+  const token = sParams.uid || sParams.bookingId;
 
-  if (!uid) return notFound();
+  if (!token) return notFound();
 
-  const booking = await getBookingByUid(uid);
+  let booking = await getBookingByUid(token);
+  if (!booking) {
+    booking = await db.booking.findUnique({
+      where: { id: token },
+      include: {
+        eventType: true,
+        host: {
+          include: { profile: true },
+        },
+      },
+    });
+  }
+
   if (!booking) return notFound();
 
   const { eventType, host } = booking;
