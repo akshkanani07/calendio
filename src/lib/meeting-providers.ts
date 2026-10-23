@@ -225,40 +225,47 @@ export function generateMeetingSession({
 
   switch (locType) {
     case 'GOOGLE_MEET': {
-      // Format: https://meet.google.com/xxx-yyyy-zzz
-      const p1 = randomLetters(3);
-      const p2 = randomLetters(4);
-      const p3 = randomLetters(3);
-      const meetingUrl = `https://meet.google.com/${p1}-${p2}-${p3}`;
-      const pin = `${randomDigits(3)} ${randomDigits(3)} ${randomDigits(3)}#`;
-      const dialIn = `(US) +1 415-555-0199 PIN: ${pin}`;
+      // If host provided their real Google Meet URL, use it directly!
+      let meetingUrl = customUrl?.trim() || '';
+      let meetingId = 'Google Meet';
+
+      if (meetingUrl.includes('meet.google.com')) {
+        const codeMatch = meetingUrl.match(/meet\.google\.com\/([a-z0-9\-]+)/i);
+        if (codeMatch) meetingId = codeMatch[1];
+      } else if (meetingUrl.length > 0) {
+        meetingId = 'Custom Room';
+      } else {
+        // Fallback to real Jitsi Live WebRTC room so it NEVER returns "Check your meeting code"!
+        meetingUrl = `https://meet.jit.si/calendio-${cleanHostSlug}-meet`;
+        meetingId = `${cleanHostSlug}-meet`;
+      }
 
       return {
         meetingUrl,
         displayLocation: 'Google Meet',
         locationType: locType,
         locationDetails: {
-          meetingId: `${p1}-${p2}-${p3}`,
-          dialIn,
-          instructions: 'Join via Google Meet in any web browser or via Google Meet mobile app.',
+          meetingId,
+          instructions: 'Join via Google Meet in any web browser or mobile app.',
         },
       };
     }
 
     case 'ZOOM': {
-      // Zoom unique meeting ID (10-11 digits): e.g. 842 9012 3841
-      const p1 = `8${randomDigits(2)}`;
-      const p2 = randomDigits(4);
-      const p3 = randomDigits(4);
-      const meetingId = `${p1} ${p2} ${p3}`;
-      const rawId = `${p1}${p2}${p3}`;
-      const passcode = randomAlphanumeric(6);
+      // If host provided their real Zoom PMI URL, use it directly!
+      let meetingUrl = customUrl?.trim() || '';
+      let meetingId = 'Personal Zoom Room';
 
-      const meetingUrl = customUrl?.includes('zoom.us')
-        ? customUrl
-        : `https://zoom.us/j/${rawId}?pwd=${passcode}`;
-
-      const dialIn = `+1 646 558 8656 US (New York) / +1 301 715 8592 US (Washington DC)`;
+      if (meetingUrl.includes('zoom.us')) {
+        const idMatch = meetingUrl.match(/zoom\.us\/(?:j\/|my\/)([0-9a-zA-Z]+)/i);
+        if (idMatch) meetingId = idMatch[1];
+      } else if (meetingUrl.length > 0) {
+        meetingId = 'Custom Room';
+      } else {
+        // Fallback to real Jitsi Live WebRTC room so it NEVER returns "Invalid meeting ID (3,001)"!
+        meetingUrl = `https://meet.jit.si/calendio-${cleanHostSlug}-zoom`;
+        meetingId = `${cleanHostSlug}-zoom`;
+      }
 
       return {
         meetingUrl,
@@ -266,116 +273,100 @@ export function generateMeetingSession({
         locationType: locType,
         locationDetails: {
           meetingId,
-          passcode,
-          dialIn,
-          instructions: `Zoom Meeting ID: ${meetingId} | Passcode: ${passcode}`,
+          instructions: `Zoom Meeting: ${meetingUrl}`,
         },
       };
     }
 
     case 'MS_TEAMS': {
-      // Microsoft Teams meeting link with context params
-      const meetingNum = `${randomDigits(3)} ${randomDigits(3)} ${randomDigits(3)} ${randomDigits(2)}`;
-      const passcode = randomAlphanumeric(6);
-      const threadToken = randomLetters(12);
-
-      const meetingUrl = `https://teams.microsoft.com/l/meetup-join/19%3ameeting_${threadToken}%40thread.v2/0?context=%7b%22Tid%22%3a%22calendio-cloud%22%2c%22Oid%22%3a%22${cleanHostSlug}%22%7d`;
+      let meetingUrl = customUrl?.trim() || '';
+      if (!meetingUrl) {
+        meetingUrl = `https://meet.jit.si/calendio-${cleanHostSlug}-teams`;
+      }
 
       return {
         meetingUrl,
         displayLocation: 'Microsoft Teams Meeting',
         locationType: locType,
         locationDetails: {
-          meetingId: meetingNum,
-          passcode,
-          dialIn: `+1 323-555-0144 (Conference ID: ${meetingNum.replace(/\s+/g, '')}#)`,
-          instructions: `Teams Meeting ID: ${meetingNum} | Passcode: ${passcode}`,
+          meetingId: `${cleanHostSlug}-teams`,
+          instructions: 'Join via Microsoft Teams or web browser.',
         },
       };
     }
 
     case 'MS_TEAMS_PERSONAL': {
-      // Personal Microsoft Teams meet link
-      const meetCode = randomAlphanumeric(10);
-      const meetingUrl = `https://teams.live.com/meet/${meetCode}`;
+      let meetingUrl = customUrl?.trim() || '';
+      if (!meetingUrl) {
+        meetingUrl = `https://meet.jit.si/calendio-${cleanHostSlug}-teams-personal`;
+      }
 
       return {
         meetingUrl,
         displayLocation: 'Microsoft Teams (Personal)',
         locationType: locType,
         locationDetails: {
-          meetingId: meetCode,
           instructions: 'Join directly using your Microsoft Account or via web browser.',
         },
       };
     }
 
     case 'WEBEX': {
-      // Cisco Webex Meeting
-      const accessCode = `2554 ${randomDigits(3)} ${randomDigits(3)}`;
-      const rawCode = accessCode.replace(/\s+/g, '');
-      const passcode = randomAlphanumeric(6);
-      const meetingUrl = customUrl?.includes('webex.com')
-        ? customUrl
-        : `https://calendio.webex.com/meet/${cleanHostSlug}-${randomLetters(4)}`;
+      let meetingUrl = customUrl?.trim() || '';
+      if (!meetingUrl) {
+        meetingUrl = `https://meet.jit.si/calendio-${cleanHostSlug}-webex`;
+      }
 
       return {
         meetingUrl,
         displayLocation: 'Cisco Webex Meeting',
         locationType: locType,
         locationDetails: {
-          meetingId: accessCode,
-          passcode,
-          dialIn: `+1-855-797-9485 US Toll free (Access Code: ${rawCode})`,
-          instructions: `Webex Access Code: ${accessCode} | Passcode: ${passcode}`,
+          instructions: 'Join Webex meeting room.',
         },
       };
     }
 
     case 'GOTO_MEETING': {
-      // GoTo Meeting 9-digit code
-      const c1 = randomDigits(3);
-      const c2 = randomDigits(3);
-      const c3 = randomDigits(3);
-      const accessCode = `${c1}-${c2}-${c3}`;
-      const meetingUrl = `https://global.gotomeeting.com/join/${c1}${c2}${c3}`;
+      let meetingUrl = customUrl?.trim() || '';
+      if (!meetingUrl) {
+        meetingUrl = `https://meet.jit.si/calendio-${cleanHostSlug}-goto`;
+      }
 
       return {
         meetingUrl,
         displayLocation: 'GoTo Meeting',
         locationType: locType,
         locationDetails: {
-          meetingId: accessCode,
-          dialIn: `United States: +1 (571) 317-3122 (Access Code: ${c1}-${c2}-${c3})`,
-          instructions: `GoTo Meeting Access Code: ${accessCode}`,
+          instructions: 'Join GoTo Meeting.',
         },
       };
     }
 
     case 'AROUND': {
-      // Around Video Call
-      const roomSlug = customUrl?.includes('around.co')
-        ? customUrl
-        : `https://meet.around.co/r/calendio-${cleanHostSlug}-${randomLetters(5)}`;
+      let meetingUrl = customUrl?.trim() || '';
+      if (!meetingUrl) {
+        meetingUrl = `https://meet.jit.si/calendio-${cleanHostSlug}-around`;
+      }
 
       return {
-        meetingUrl: roomSlug,
+        meetingUrl,
         displayLocation: 'Around Video',
         locationType: locType,
         locationDetails: {
-          instructions: 'Join via browser or open in Around desktop app for audio clarity.',
+          instructions: 'Join Around video room.',
         },
       };
     }
 
     case 'WHEREBY': {
-      // Whereby room
-      const roomSlug = customUrl?.includes('whereby.com')
-        ? customUrl
-        : `https://whereby.com/calendio-${cleanHostSlug}-${randomLetters(4)}`;
+      let meetingUrl = customUrl?.trim() || '';
+      if (!meetingUrl) {
+        meetingUrl = `https://meet.jit.si/calendio-${cleanHostSlug}-whereby`;
+      }
 
       return {
-        meetingUrl: roomSlug,
+        meetingUrl,
         displayLocation: 'Whereby Video Room',
         locationType: locType,
         locationDetails: {

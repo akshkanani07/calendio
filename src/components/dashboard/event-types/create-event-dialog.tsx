@@ -588,39 +588,76 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
                 </div>
               )}
 
-              {(locationType === 'ZOOM' || locationType === 'WEBEX' || locationType === 'AROUND' || locationType === 'WHEREBY') && (
-                <div className="pt-3 space-y-1.5 animate-in fade-in duration-150">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center justify-between">
-                    <span>Personal Room Link Override (Optional)</span>
-                    <span className="text-[10px] text-slate-400 font-normal">Leave blank for auto-generated meetings</span>
-                  </label>
+              {locationType === 'GOOGLE_MEET' && (
+                <div className="pt-3 space-y-2 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Your Google Meet Link
+                    </label>
+                    <a
+                      href="https://meet.google.com/new"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-bold text-brand-600 dark:text-brand-400 hover:underline inline-flex items-center gap-1"
+                    >
+                      <span>+ Create Google Meet Room</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
                   <Input
-                    placeholder={
-                      locationType === 'ZOOM'
-                        ? 'https://zoom.us/j/your-personal-id (optional)'
-                        : locationType === 'WEBEX'
-                        ? 'https://calendio.webex.com/meet/username (optional)'
-                        : locationType === 'AROUND'
-                        ? 'https://meet.around.co/your-room (optional)'
-                        : 'https://whereby.com/your-room (optional)'
-                    }
+                    placeholder="https://meet.google.com/xxx-yyyy-zzz (or leave empty for Calendio Live Video)"
                     value={locationUrl}
                     onChange={(e) => setLocationUrl(e.target.value)}
-                    className="h-11 rounded-2xl"
+                    className="h-11 rounded-2xl font-mono text-xs"
                   />
-                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5 pt-0.5">
-                    <CheckCircle2 className="h-3.5 w-3.5" />
-                    <span>Auto-generation is active: Calendio creates unique rooms &amp; credentials automatically.</span>
+                  <p className="text-[11px] text-slate-400">
+                    Paste your permanent Google Meet link. If left blank, Calendio will automatically provide a live, functional WebRTC video room so meetings never fail with &quot;Invalid Code&quot;.
                   </p>
                 </div>
               )}
 
-              {(locationType === 'GOOGLE_MEET' || locationType === 'MS_TEAMS' || locationType === 'MS_TEAMS_PERSONAL' || locationType === 'GOTO_MEETING') && (
-                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 text-xs flex items-center gap-2.5 text-slate-600 dark:text-slate-300">
-                  <Info className="h-4 w-4 text-brand-500 shrink-0" />
-                  <span>
-                    A dedicated, secure <strong>{getProviderMeta(locationType).name}</strong> meeting link and join credentials will be automatically generated upon each booking and synced to calendar invites.
-                  </span>
+              {locationType === 'ZOOM' && (
+                <div className="pt-3 space-y-2 animate-in fade-in duration-150">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                      Your Zoom Personal Meeting Link (PMI)
+                    </label>
+                    <a
+                      href="https://zoom.us/profile"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[11px] font-bold text-sky-600 dark:text-sky-400 hover:underline inline-flex items-center gap-1"
+                    >
+                      <span>+ Open Zoom Profile to copy PMI</span>
+                      <ExternalLink className="h-3 w-3" />
+                    </a>
+                  </div>
+                  <Input
+                    placeholder="https://zoom.us/j/1234567890 or https://zoom.us/my/yourname"
+                    value={locationUrl}
+                    onChange={(e) => setLocationUrl(e.target.value)}
+                    className="h-11 rounded-2xl font-mono text-xs"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    Paste your Zoom Personal Meeting URL. If left blank, Calendio automatically connects to a live video room so attendees never see &quot;Invalid Meeting ID (3,001)&quot;.
+                  </p>
+                </div>
+              )}
+
+              {(locationType === 'MS_TEAMS' || locationType === 'MS_TEAMS_PERSONAL' || locationType === 'WEBEX' || locationType === 'GOTO_MEETING' || locationType === 'AROUND' || locationType === 'WHEREBY') && (
+                <div className="pt-3 space-y-2 animate-in fade-in duration-150">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    {locationType.replace(/_/g, ' ')} Room Link (Optional)
+                  </label>
+                  <Input
+                    placeholder={`https://${locationType.toLowerCase().replace(/_/g, '')}.com/your-room (optional)`}
+                    value={locationUrl}
+                    onChange={(e) => setLocationUrl(e.target.value)}
+                    className="h-11 rounded-2xl font-mono text-xs"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    Paste your meeting room link or leave blank to use Calendio&apos;s live cloud room.
+                  </p>
                 </div>
               )}
             </div>
