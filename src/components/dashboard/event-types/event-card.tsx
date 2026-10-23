@@ -40,8 +40,10 @@ export function EventCard({ event, username }: EventCardProps) {
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isPending, setIsPending] = useState(false);
 
+  const cleanUsername = username || 'me';
+
   const handleCopyLink = () => {
-    const publicUrl = `${window.location.origin}/${username}/${event.slug}`;
+    const publicUrl = `${window.location.origin}/${cleanUsername}/${event.slug}`;
     navigator.clipboard.writeText(publicUrl);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
@@ -156,7 +158,7 @@ export function EventCard({ event, username }: EventCardProps) {
           {/* Bottom Card Footer Actions */}
           <div className="mt-6 pt-3 border-t border-slate-100 dark:border-slate-800/80 flex items-center justify-between text-xs">
             <Link
-              href={`/${username}/${event.slug}`}
+              href={`/${cleanUsername}/${event.slug}`}
               target="_blank"
               className="font-bold text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-1"
             >

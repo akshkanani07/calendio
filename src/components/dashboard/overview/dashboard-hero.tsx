@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
@@ -32,9 +32,10 @@ export function DashboardHero({ userName, username }: DashboardHeroProps) {
     else setGreeting('Good evening');
   }, []);
 
+  const cleanUsername = username || 'me';
   const publicUrl = typeof window !== 'undefined'
-    ? `${window.location.origin}/${username}`
-    : `/${username}`;
+    ? `${window.location.origin}/${cleanUsername}`
+    : `/${cleanUsername}`;
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(publicUrl);
@@ -43,7 +44,7 @@ export function DashboardHero({ userName, username }: DashboardHeroProps) {
   };
 
   return (
-    <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50/50 to-brand-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-brand-950/20 p-6 sm:p-8 shadow-sm">
+    <div className="relative overflow-hidden rounded-3xl border border-slate-200/80 dark:border-slate-800 bg-gradient-to-br from-white via-slate-50/50 to-brand-50/30 dark:from-slate-900 dark:via-slate-900/90 dark:to-brand-950/20 p-5 sm:p-8 shadow-sm">
       {/* Subtle decorative background glow */}
       <div className="absolute -right-16 -top-16 w-64 h-64 bg-brand-500/10 dark:bg-brand-500/5 rounded-full blur-3xl pointer-events-none" />
 
@@ -53,15 +54,15 @@ export function DashboardHero({ userName, username }: DashboardHeroProps) {
           <div className="flex items-center gap-2">
             <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400 border border-emerald-200/60 dark:border-emerald-900/60">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
-              Calendar Synced & Active
+              Calendar Active
             </span>
             <span className="text-xs text-slate-400 hidden sm:inline">&bull;</span>
             <span className="text-xs text-slate-500 dark:text-slate-400 hidden sm:inline">
-              100% Free Smart Scheduling
+              Smart Scheduling Engine
             </span>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
+          <h1 className="text-xl sm:text-3xl font-black tracking-tight text-slate-900 dark:text-white leading-tight">
             {greeting}, {userName}! 👋
           </h1>
 
@@ -71,10 +72,10 @@ export function DashboardHero({ userName, username }: DashboardHeroProps) {
 
           {/* Quick Booking Link Capsule */}
           <div className="pt-2 flex flex-wrap items-center gap-2">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm max-w-md">
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-sm w-full sm:w-auto max-w-md">
               <Globe className="w-3.5 h-3.5 text-brand-600 dark:text-brand-400 shrink-0" />
               <span className="text-xs font-mono font-medium text-slate-700 dark:text-slate-200 truncate select-all">
-                calendio.com/{username}
+                calendio.com/{cleanUsername}
               </span>
               <button
                 type="button"
@@ -91,7 +92,7 @@ export function DashboardHero({ userName, username }: DashboardHeroProps) {
             </div>
 
             <a
-              href={`/${username}`}
+              href={`/${cleanUsername}`}
               target="_blank"
               rel="noopener noreferrer"
               className="inline-flex items-center gap-1 px-3 py-1.5 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-brand-600 hover:bg-white dark:hover:bg-slate-800 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-all"

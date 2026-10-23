@@ -1,8 +1,9 @@
-﻿'use client';
+'use client';
 
 import React, { useState } from 'react';
 import { DashboardSidebar } from './sidebar';
 import { DashboardTopbar } from './topbar';
+import { MobileBottomNav } from './mobile-bottom-nav';
 
 interface DashboardLayoutClientProps {
   user: {
@@ -27,15 +28,15 @@ export function DashboardLayoutClient({ user, children }: DashboardLayoutClientP
 
       {/* 2. Mobile Drawer Sidebar (slide-over with backdrop) */}
       {isMobileOpen && (
-        <div className="fixed inset-0 z-50 lg:hidden flex">
+        <div className="fixed inset-0 z-50 lg:hidden flex animate-in fade-in duration-200">
           {/* Backdrop */}
           <div
-            className="fixed inset-0 bg-slate-950/70 backdrop-blur-sm transition-opacity"
+            className="fixed inset-0 bg-slate-950/75 backdrop-blur-sm transition-opacity"
             onClick={() => setIsMobileOpen(false)}
           />
 
           {/* Drawer content */}
-          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-slate-950 shadow-2xl z-10 animate-in slide-in-from-left duration-200">
+          <div className="relative flex-1 flex flex-col max-w-xs w-full bg-white dark:bg-slate-950 shadow-2xl z-10 animate-in slide-in-from-left duration-250">
             <DashboardSidebar user={user} onCloseMobile={() => setIsMobileOpen(false)} />
           </div>
         </div>
@@ -49,10 +50,16 @@ export function DashboardLayoutClient({ user, children }: DashboardLayoutClientP
           onToggleMobileMenu={() => setIsMobileOpen(true)}
         />
 
-        {/* Dynamic Page Content */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        {/* Dynamic Page Content with bottom safe-area for mobile dock */}
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto pb-24 lg:pb-8 transition-all">
           {children}
         </main>
+
+        {/* 4. Ultra-Premium Floating Mobile Bottom Navigation Dock */}
+        <MobileBottomNav
+          user={user}
+          onOpenDrawer={() => setIsMobileOpen(true)}
+        />
       </div>
     </div>
   );

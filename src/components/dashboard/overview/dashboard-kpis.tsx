@@ -1,4 +1,4 @@
-﻿'use client';
+'use client';
 
 import React from 'react';
 import Link from 'next/link';
@@ -68,35 +68,35 @@ export function DashboardKpis({
   ];
 
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+    <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
       {cards.map((c) => {
         const Icon = c.icon;
         return (
           <Link
             key={c.title}
             href={c.href}
-            className={`group p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all duration-200 hover:shadow-md ${c.border}`}
+            className={`group p-3.5 sm:p-5 rounded-2xl bg-white dark:bg-slate-900 border border-slate-200/80 dark:border-slate-800 shadow-sm transition-all duration-200 hover:shadow-md active:scale-95 ${c.border}`}
           >
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <span className="text-[10px] sm:text-xs font-semibold text-slate-400 uppercase tracking-wider truncate">
                 {c.title}
               </span>
               <div
-                className={`h-9 w-9 rounded-xl ${c.bg} ${c.color} flex items-center justify-center transition-transform group-hover:scale-110`}
+                className={`h-8 w-8 sm:h-9 sm:w-9 rounded-xl ${c.bg} ${c.color} flex items-center justify-center transition-transform group-hover:scale-110 shrink-0 ml-1`}
               >
-                <Icon className="w-4 h-4" />
+                <Icon className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
               </div>
             </div>
 
-            <div className="mt-3 flex items-baseline justify-between">
-              <span className="text-3xl font-black text-slate-900 dark:text-white tracking-tight">
+            <div className="mt-2 sm:mt-3 flex items-baseline justify-between">
+              <span className="text-xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
                 {c.value}
               </span>
 
-              <ArrowUpRight className="w-4 h-4 text-slate-300 dark:text-slate-600 group-hover:text-brand-500 transition-colors" />
+              <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-slate-300 dark:text-slate-600 group-hover:text-brand-500 transition-colors" />
             </div>
 
-            <p className="mt-1 text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
+            <p className="mt-0.5 sm:mt-1 text-[11px] sm:text-xs text-slate-500 dark:text-slate-400 font-medium truncate">
               {c.sub}
             </p>
           </Link>

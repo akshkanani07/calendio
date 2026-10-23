@@ -118,13 +118,13 @@ export function BookingsView({
           </p>
         </div>
 
-        <div className="flex items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={handleCopyLink}
-            className="rounded-xl text-xs font-semibold h-10 px-3.5"
+            className="rounded-xl text-xs font-semibold h-10 px-3.5 flex-1 sm:flex-initial"
           >
             {copied ? (
               <>
@@ -134,7 +134,7 @@ export function BookingsView({
             ) : (
               <>
                 <Copy className="h-3.5 w-3.5 mr-1.5" />
-                <span>Copy Booking Link</span>
+                <span>Copy Link</span>
               </>
             )}
           </Button>
@@ -145,7 +145,7 @@ export function BookingsView({
             size="sm"
             onClick={handleExportCsv}
             disabled={activeBookings.length === 0}
-            className="rounded-xl text-xs font-semibold h-10 px-3.5"
+            className="rounded-xl text-xs font-semibold h-10 px-3.5 flex-1 sm:flex-initial"
           >
             <Download className="h-3.5 w-3.5 mr-1.5" />
             <span>Export CSV</span>
@@ -156,7 +156,7 @@ export function BookingsView({
       {/* Tabs & Search Bar */}
       <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
         {/* Navigation Tabs */}
-        <div className="flex items-center p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 w-fit">
+        <div className="flex items-center p-1 rounded-2xl bg-slate-100 dark:bg-slate-800/80 border border-slate-200/80 dark:border-slate-700/60 w-full sm:w-fit overflow-x-auto">
           <button
             type="button"
             onClick={() => setActiveTab('upcoming')}

@@ -25,7 +25,7 @@ export default async function EventTypesPage() {
   if (!user) redirect('/login');
 
   const eventTypes = user.eventTypes || [];
-  const username = user.profile?.username || 'me';
+  const username = user.profile?.username || (user.name || user.email.split('@')[0]).toLowerCase().replace(/[^a-z0-9]/g, '-') || 'user';
 
   return (
     <div className="space-y-8 animate-fade-in">

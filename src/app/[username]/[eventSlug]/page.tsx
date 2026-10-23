@@ -1,6 +1,9 @@
-﻿import React from 'react';
-import { notFound } from 'next/navigation';
+import React from 'react';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
+import { db } from '@/lib/db';
 import { getPublicEventDetails } from '@/app/actions/booking.actions';
 import { Clock, Video, Phone, MapPin, ArrowLeft } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,6 +17,20 @@ export default async function PublicBookingPage({
   params: Promise<{ username: string; eventSlug: string }>;
 }) {
   const { username, eventSlug } = await params;
+
+  if (username === 'me') {
+    const session = await getServerSession(authOptions);
+    if (session?.user?.email) {
+      const u = await db.user.findUnique({
+        where: { email: session.user.email },
+        include: { profile: true },
+      });
+      if (u?.profile?.username) {
+        redirect(`/${u.profile.username}/${eventSlug}`);
+      }
+    }
+  }
+
   const data = await getPublicEventDetails(username, eventSlug);
 
   if (!data) {

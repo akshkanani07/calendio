@@ -1,5 +1,5 @@
-﻿import React from 'react';
-import { notFound } from 'next/navigation';
+import React from 'react';
+import { notFound, redirect } from 'next/navigation';
 import Link from 'next/link';
 import { getPublicUserByUsername } from '@/app/actions/booking.actions';
 import { Clock, Video, Phone, MapPin, ArrowRight, CheckCircle2, Calendar } from 'lucide-react';
@@ -13,6 +13,11 @@ export default async function HostProfilePage({
   params: Promise<{ username: string }>;
 }) {
   const { username } = await params;
+
+  if (username === 'me') {
+    redirect('/me');
+  }
+
   const host = await getPublicUserByUsername(username);
 
   if (!host) {

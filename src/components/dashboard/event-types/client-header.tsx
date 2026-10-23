@@ -23,7 +23,7 @@ export function EventTypesClientHeader({ totalCount }: { totalCount: number }) {
 
         <Button
           onClick={() => setIsOpen(true)}
-          className="h-11 px-5 bg-brand-500 hover:bg-brand-600 text-white font-semibold rounded-xl shadow-md shadow-brand-500/20 text-xs flex items-center gap-2 hover:scale-[1.02] transition-all"
+          className="h-11 px-5 w-full sm:w-auto bg-gradient-to-r from-brand-600 to-indigo-600 hover:from-brand-700 hover:to-indigo-700 text-white font-semibold rounded-2xl shadow-md shadow-brand-500/20 text-xs flex items-center justify-center gap-2 hover:scale-[1.02] active:scale-95 transition-all"
         >
           <Plus className="h-4 w-4 stroke-[3]" />
           <span>New Event Type</span>

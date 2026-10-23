@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { redirect } from 'next/navigation';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
@@ -26,12 +26,39 @@ export default async function DashboardLayout({
     redirect('/login');
   }
 
+  let profile = user.profile;
+  if (!profile) {
+    const baseUsername = (user.name || user.email.split('@')[0])
+      .toLowerCase()
+      .replace(/[^a-z0-9]/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-|-$/g, '') || 'user';
+
+    let chosenUsername = baseUsername;
+    const existing = await db.profile.findUnique({ where: { username: chosenUsername } });
+    if (existing) {
+      chosenUsername = `${baseUsername}-${Math.floor(1000 + Math.random() * 9000)}`;
+    }
+
+    try {
+      profile = await db.profile.create({
+        data: {
+          userId: user.id,
+          username: chosenUsername,
+          bio: 'Welcome to my scheduling page! Pick a time that works best for you.',
+        },
+      });
+    } catch {
+      profile = await db.profile.findFirst({ where: { userId: user.id } });
+    }
+  }
+
   const userData = {
     id: user.id,
     name: user.name,
     email: user.email,
     image: user.image,
-    username: user.profile?.username,
+    username: profile?.username || 'user',
   };
 
   return (
