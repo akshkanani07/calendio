@@ -5,7 +5,7 @@
   "description": "Smart Scheduling For Everyone - 100% Free Appointment Scheduling & Meeting Management Platform",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "prisma generate && next build",
     "start": "next start",
     "lint": "next lint",
     "db:push": "prisma db push",
