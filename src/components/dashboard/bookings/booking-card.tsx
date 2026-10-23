@@ -14,7 +14,10 @@ import {
   FileText,
   ChevronDown,
   ChevronUp,
+  Phone,
+  MapPin,
 } from 'lucide-react';
+import { getProviderMeta } from '@/lib/meeting-providers';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -192,18 +195,22 @@ export function BookingCard({ booking, onCancel, onReschedule }: BookingCardProp
         {/* Footer Actions Row */}
         <div className="pt-2 flex flex-wrap items-center justify-between gap-3 text-xs">
           <div className="flex items-center gap-3">
-            {booking.meetingUrl && !isCancelled && (
-              <a
-                href={booking.meetingUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
-              >
-                <Video className="h-3.5 w-3.5" />
-                <span>Join Google Meet</span>
-                <ExternalLink className="h-3 w-3" />
-              </a>
-            )}
+            {booking.meetingUrl && !isCancelled && (() => {
+              const meta = getProviderMeta(booking.locationType || booking.eventType?.locationType || 'GOOGLE_MEET');
+              const IconComp = meta.category === 'phone' ? Phone : meta.category === 'in_person' ? MapPin : Video;
+              return (
+                <a
+                  href={booking.meetingUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:underline"
+                >
+                  <IconComp className="h-3.5 w-3.5" />
+                  <span>{meta.joinButtonText}</span>
+                  <ExternalLink className="h-3 w-3" />
+                </a>
+              );
+            })()}
 
             {(booking.guestNotes || booking.customResponses) && (
               <button

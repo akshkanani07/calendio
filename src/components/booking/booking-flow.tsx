@@ -35,6 +35,7 @@ import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { getAvailableSlotsForDate, createPublicBooking } from '@/app/actions/booking.actions';
 import { getInitials, cn } from '@/lib/utils';
+import { getProviderMeta } from '@/lib/meeting-providers';
 
 // Common global timezones for instant selection
 const POPULAR_TIMEZONES = [
@@ -373,12 +374,14 @@ export function BookingFlow({ host, eventType }: BookingFlowProps) {
                   variant="secondary"
                   className="px-2.5 py-1 rounded-xl text-xs font-bold flex items-center gap-1.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 shadow-2xs"
                 >
-                  <Video className="h-3.5 w-3.5 text-brand-500" />
-                  <span>
-                    {eventType.locationType === 'GOOGLE_MEET'
-                      ? 'Google Meet'
-                      : eventType.locationType}
-                  </span>
+                  {eventType.locationType === 'PHONE_CALL' ? (
+                    <Phone className="h-3.5 w-3.5 text-emerald-500" />
+                  ) : eventType.locationType === 'IN_PERSON' ? (
+                    <MapPin className="h-3.5 w-3.5 text-orange-500" />
+                  ) : (
+                    <Video className="h-3.5 w-3.5 text-brand-500" />
+                  )}
+                  <span>{getProviderMeta(eventType.locationType).name}</span>
                 </Badge>
 
                 <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-200/50 dark:border-emerald-800/40">

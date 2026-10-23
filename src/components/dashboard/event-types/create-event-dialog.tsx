@@ -35,8 +35,11 @@ import {
   X,
   ExternalLink,
   Calendar,
+  Link as LinkIcon,
+  Info,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { getProviderMeta } from '@/lib/meeting-providers';
 
 interface CreateEventDialogProps {
   open: boolean;
@@ -65,28 +68,88 @@ const LOCATION_OPTIONS = [
     label: 'Google Meet',
     desc: 'Auto-generates Google Meet link on booking',
     icon: Video,
-    color: 'text-brand-500',
+    color: 'text-emerald-500',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/50',
   },
   {
     value: 'ZOOM',
     label: 'Zoom Video',
-    desc: 'Direct attendee to Zoom meeting link',
+    desc: 'Generates dedicated Zoom meeting ID & passcode',
     icon: Video,
     color: 'text-sky-500',
+    bg: 'bg-sky-50 dark:bg-sky-950/50',
+  },
+  {
+    value: 'MS_TEAMS',
+    label: 'Microsoft Teams',
+    desc: 'Enterprise Microsoft Teams Work/School meeting link',
+    icon: Video,
+    color: 'text-indigo-500',
+    bg: 'bg-indigo-50 dark:bg-indigo-950/50',
+  },
+  {
+    value: 'MS_TEAMS_PERSONAL',
+    label: 'Teams (Personal)',
+    desc: 'Personal Microsoft Teams meet link for individual accounts',
+    icon: Video,
+    color: 'text-indigo-400',
+    bg: 'bg-indigo-50 dark:bg-indigo-950/40',
+  },
+  {
+    value: 'WEBEX',
+    label: 'Cisco Webex',
+    desc: 'Webex meeting room with access code and audio dial-in',
+    icon: Video,
+    color: 'text-cyan-500',
+    bg: 'bg-cyan-50 dark:bg-cyan-950/50',
+  },
+  {
+    value: 'GOTO_MEETING',
+    label: 'GoTo Meeting',
+    desc: 'GoTo Meeting session link with 9-digit access code',
+    icon: Video,
+    color: 'text-amber-500',
+    bg: 'bg-amber-50 dark:bg-amber-950/50',
+  },
+  {
+    value: 'AROUND',
+    label: 'Around Video',
+    desc: 'High-clarity collaborative video meeting room',
+    icon: Video,
+    color: 'text-purple-500',
+    bg: 'bg-purple-50 dark:bg-purple-950/50',
+  },
+  {
+    value: 'WHEREBY',
+    label: 'Whereby Video',
+    desc: 'Instant browser video call, zero app installation required',
+    icon: Video,
+    color: 'text-teal-500',
+    bg: 'bg-teal-50 dark:bg-teal-950/50',
+  },
+  {
+    value: 'CUSTOM',
+    label: 'Custom Meeting Link',
+    desc: 'Provide your own video link (Jitsi, Discord, or portal)',
+    icon: LinkIcon,
+    color: 'text-blue-500',
+    bg: 'bg-blue-50 dark:bg-blue-950/50',
   },
   {
     value: 'PHONE_CALL',
     label: 'Phone Call',
-    desc: 'You or the attendee will initiate a phone call',
+    desc: 'Direct telephone conversation with your invitee',
     icon: Phone,
     color: 'text-emerald-500',
+    bg: 'bg-emerald-50 dark:bg-emerald-950/50',
   },
   {
     value: 'IN_PERSON',
     label: 'In-Person Meeting',
-    desc: 'Physical coffee shop, office, or client address',
+    desc: 'Physical coffee shop, corporate office, or venue address',
     icon: MapPin,
-    color: 'text-amber-500',
+    color: 'text-orange-500',
+    bg: 'bg-orange-50 dark:bg-orange-950/50',
   },
 ];
 
@@ -471,22 +534,93 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
                 })}
               </div>
 
-              {/* Conditional Location Input (For Zoom URL or Physical Address) */}
-              {(locationType === 'ZOOM' || locationType === 'IN_PERSON') && (
+              {/* Adaptive Location Configuration Fields */}
+              {locationType === 'CUSTOM' && (
                 <div className="pt-3 space-y-1.5 animate-in fade-in duration-150">
                   <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
-                    {locationType === 'ZOOM' ? 'Zoom Personal Meeting URL' : 'Meeting Address / Venue'}
+                    Custom Meeting URL / Portal <span className="text-rose-500">*</span>
+                  </label>
+                  <Input
+                    required
+                    placeholder="https://meet.jit.si/your-room or https://your-company.com/meet"
+                    value={locationUrl}
+                    onChange={(e) => setLocationUrl(e.target.value)}
+                    className="h-11 rounded-2xl"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    Invitees will be directed to this link when they click &quot;Join Meeting&quot;.
+                  </p>
+                </div>
+              )}
+
+              {locationType === 'IN_PERSON' && (
+                <div className="pt-3 space-y-1.5 animate-in fade-in duration-150">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Physical Meeting Address / Venue <span className="text-rose-500">*</span>
+                  </label>
+                  <Input
+                    required
+                    placeholder="e.g. 100 Market St, Floor 4, San Francisco, CA or Blue Bottle Coffee"
+                    value={locationUrl}
+                    onChange={(e) => setLocationUrl(e.target.value)}
+                    className="h-11 rounded-2xl"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    A Google Maps directions link will be automatically generated in invites.
+                  </p>
+                </div>
+              )}
+
+              {locationType === 'PHONE_CALL' && (
+                <div className="pt-3 space-y-1.5 animate-in fade-in duration-150">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300">
+                    Phone Call Instructions / Host Number
+                  </label>
+                  <Input
+                    placeholder="+1 (555) 019-2834 or leave blank for Host to call Invitee"
+                    value={locationUrl}
+                    onChange={(e) => setLocationUrl(e.target.value)}
+                    className="h-11 rounded-2xl"
+                  />
+                  <p className="text-[11px] text-slate-400">
+                    Specify your phone number or leave blank to ask the invitee for their phone number upon booking.
+                  </p>
+                </div>
+              )}
+
+              {(locationType === 'ZOOM' || locationType === 'WEBEX' || locationType === 'AROUND' || locationType === 'WHEREBY') && (
+                <div className="pt-3 space-y-1.5 animate-in fade-in duration-150">
+                  <label className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300 flex items-center justify-between">
+                    <span>Personal Room Link Override (Optional)</span>
+                    <span className="text-[10px] text-slate-400 font-normal">Leave blank for auto-generated meetings</span>
                   </label>
                   <Input
                     placeholder={
                       locationType === 'ZOOM'
-                        ? 'https://zoom.us/j/123456789'
-                        : 'e.g. 100 Main St, Suite 400 or Starbucks Midtown'
+                        ? 'https://zoom.us/j/your-personal-id (optional)'
+                        : locationType === 'WEBEX'
+                        ? 'https://calendio.webex.com/meet/username (optional)'
+                        : locationType === 'AROUND'
+                        ? 'https://meet.around.co/your-room (optional)'
+                        : 'https://whereby.com/your-room (optional)'
                     }
                     value={locationUrl}
                     onChange={(e) => setLocationUrl(e.target.value)}
                     className="h-11 rounded-2xl"
                   />
+                  <p className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold flex items-center gap-1.5 pt-0.5">
+                    <CheckCircle2 className="h-3.5 w-3.5" />
+                    <span>Auto-generation is active: Calendio creates unique rooms &amp; credentials automatically.</span>
+                  </p>
+                </div>
+              )}
+
+              {(locationType === 'GOOGLE_MEET' || locationType === 'MS_TEAMS' || locationType === 'MS_TEAMS_PERSONAL' || locationType === 'GOTO_MEETING') && (
+                <div className="p-3.5 rounded-2xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200/80 dark:border-slate-700/60 text-xs flex items-center gap-2.5 text-slate-600 dark:text-slate-300">
+                  <Info className="h-4 w-4 text-brand-500 shrink-0" />
+                  <span>
+                    A dedicated, secure <strong>{getProviderMeta(locationType).name}</strong> meeting link and join credentials will be automatically generated upon each booking and synced to calendar invites.
+                  </span>
                 </div>
               )}
             </div>
@@ -629,8 +763,14 @@ export function CreateEventDialog({ open, onOpenChange, eventToEdit }: CreateEve
                     </Badge>
 
                     <Badge variant="secondary" className="text-xs font-bold px-2.5 py-1 rounded-xl">
-                      <Video className="w-3.5 h-3.5 mr-1" />
-                      {locationType === 'GOOGLE_MEET' ? 'Google Meet' : locationType}
+                      {locationType === 'PHONE_CALL' ? (
+                        <Phone className="w-3.5 h-3.5 mr-1 text-emerald-500" />
+                      ) : locationType === 'IN_PERSON' ? (
+                        <MapPin className="w-3.5 h-3.5 mr-1 text-orange-500" />
+                      ) : (
+                        <Video className="w-3.5 h-3.5 mr-1 text-brand-500" />
+                      )}
+                      {getProviderMeta(locationType).name}
                     </Badge>
                   </div>
 

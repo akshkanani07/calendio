@@ -34,6 +34,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Logo } from '@/components/shared/logo';
 import { useAppTheme } from '@/components/shared/theme-provider';
 import { getInitials, cn } from '@/lib/utils';
+import { getProviderMeta } from '@/lib/meeting-providers';
 
 interface PublicHostProfileViewProps {
   host: {
@@ -460,34 +461,16 @@ export function PublicHostProfileView({ host }: PublicHostProfileViewProps) {
                           <span>{event.duration} mins</span>
                         </span>
 
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
-                          {event.locationType === 'GOOGLE_MEET' && (
-                            <>
-                              <Video className="h-3.5 w-3.5 text-emerald-500" />
-                              <span>Google Meet</span>
-                            </>
-                          )}
-                          {event.locationType === 'PHONE_CALL' && (
-                            <>
-                              <Phone className="h-3.5 w-3.5 text-sky-500" />
-                              <span>Phone Call</span>
-                            </>
-                          )}
-                          {event.locationType === 'IN_PERSON' && (
-                            <>
-                              <MapPin className="h-3.5 w-3.5 text-amber-500" />
-                              <span>In-Person</span>
-                            </>
-                          )}
-                          {event.locationType !== 'GOOGLE_MEET' &&
-                            event.locationType !== 'PHONE_CALL' &&
-                            event.locationType !== 'IN_PERSON' && (
-                              <>
-                                <Video className="h-3.5 w-3.5 text-brand-500" />
-                                <span>Web Conference</span>
-                              </>
-                            )}
-                        </span>
+                        {(() => {
+                          const pMeta = getProviderMeta(event.locationType || 'GOOGLE_MEET');
+                          const IconComp = pMeta.category === 'phone' ? Phone : pMeta.category === 'in_person' ? MapPin : Video;
+                          return (
+                            <span className="inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200">
+                              <IconComp className="h-3.5 w-3.5 text-slate-500" />
+                              <span>{pMeta.name}</span>
+                            </span>
+                          );
+                        })()}
 
                         <span className="text-[11px] font-semibold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
                           <CheckCircle2 className="w-3.5 h-3.5" />

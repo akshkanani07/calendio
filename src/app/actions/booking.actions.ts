@@ -7,6 +7,7 @@ import {
   getBookingConfirmationEmailTemplate,
   getHostBookingNotificationTemplate,
 } from '@/lib/email-templates';
+import { generateMeetingSession } from '@/lib/meeting-providers';
 import { revalidatePath } from 'next/cache';
 import { z } from 'zod';
 
@@ -280,11 +281,17 @@ export async function createPublicBooking(data: z.infer<typeof BookingCreateSche
       };
     }
 
-    // Generate meeting URL if Google Meet or custom
-    let meetingUrl = eventType.locationUrl || null;
-    if (eventType.locationType === 'GOOGLE_MEET' && !meetingUrl) {
-      meetingUrl = generateGoogleMeetSlug();
-    }
+    // Generate authentic conferencing meeting link according to provider (Zoom, Google Meet, Teams, Webex, Whereby, etc.)
+    const meetingSession = generateMeetingSession({
+      provider: eventType.locationType,
+      hostName: host.name || 'Calendio Host',
+      hostSlug: host.name?.toLowerCase().replace(/\s+/g, '-') || 'host',
+      eventTitle: eventType.title,
+      customUrl: eventType.locationUrl,
+      guestPhone: (validated.answers as any)?.phone || validated.guestNotes,
+    });
+
+    const meetingUrl = meetingSession.meetingUrl;
 
     // Create Booking and Meeting in Transaction
     const booking = await (db as any).$transaction(async (tx: any) => {
@@ -300,6 +307,8 @@ export async function createPublicBooking(data: z.infer<typeof BookingCreateSche
           startTime,
           endTime,
           meetingUrl,
+          locationType: eventType.locationType as any,
+          locationDetails: meetingSession.locationDetails as any,
           status: 'CONFIRMED',
         },
       });
@@ -362,6 +371,8 @@ export async function createPublicBooking(data: z.infer<typeof BookingCreateSche
       formattedDateTime,
       timeZone: validated.guestTimeZone,
       meetingUrl,
+      locationType: eventType.locationType,
+      locationDetails: meetingSession.locationDetails,
       notes: validated.guestNotes,
     });
 
@@ -382,6 +393,8 @@ export async function createPublicBooking(data: z.infer<typeof BookingCreateSche
       formattedDateTime,
       timeZone: validated.guestTimeZone,
       meetingUrl,
+      locationType: eventType.locationType,
+      locationDetails: meetingSession.locationDetails,
       notes: validated.guestNotes,
     });
 

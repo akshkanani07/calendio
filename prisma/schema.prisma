@@ -26,9 +26,14 @@ enum LocationType {
   GOOGLE_MEET
   ZOOM
   MS_TEAMS
+  MS_TEAMS_PERSONAL
+  WEBEX
+  GOTO_MEETING
+  AROUND
+  WHEREBY
+  CUSTOM
   PHONE_CALL
   IN_PERSON
-  CUSTOM
 }
 
 enum SchedulingType {
@@ -295,6 +300,8 @@ model Booking {
   guestTimeZone   String        @default("UTC")
   customResponses Json?         // Answers to eventType.customQuestions
   meetingUrl      String?
+  locationType    LocationType?
+  locationDetails Json?
   cancelReason    String?
   rescheduledFrom String?       // Previous booking uid
   createdAt       DateTime      @default(now())

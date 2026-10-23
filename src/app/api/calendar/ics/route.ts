@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
 import { generateIcsContent } from '@/lib/calendar-export';
+import { formatLocationForCalendar, formatInstructionsForCalendar } from '@/lib/meeting-providers';
 
 export async function GET(req: NextRequest) {
   try {
@@ -23,11 +24,24 @@ export async function GET(req: NextRequest) {
       return new NextResponse('Booking not found', { status: 404 });
     }
 
+    const locType = (booking as any).locationType || booking.eventType.locationType || 'GOOGLE_MEET';
+    const locDetails = (booking as any).locationDetails || null;
+
+    const formattedLocation = formatLocationForCalendar(locType, booking.meetingUrl, locDetails);
+    const formattedDescription = formatInstructionsForCalendar({
+      locationType: locType,
+      meetingUrl: booking.meetingUrl,
+      locationDetails: locDetails,
+      hostName: booking.host.name || 'Calendio Host',
+      guestName: booking.guestName,
+      notes: booking.guestNotes || booking.eventType.description,
+    });
+
     const ics = generateIcsContent({
       uid: booking.uid,
       title: `${booking.eventType.title} with ${booking.host.name || 'Host'}`,
-      description: booking.guestNotes || booking.eventType.description || 'Scheduled via Calendio',
-      location: booking.meetingUrl || 'Google Meet',
+      description: formattedDescription,
+      location: formattedLocation,
       startTime: booking.startTime,
       endTime: booking.endTime,
       hostName: booking.host.name || 'Calendio Host',

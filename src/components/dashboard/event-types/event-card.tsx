@@ -13,7 +13,10 @@ import {
   Pencil,
   CopyPlus,
   Trash2,
+  Phone,
+  MapPin,
 } from 'lucide-react';
+import { getProviderMeta } from '@/lib/meeting-providers';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
@@ -141,10 +144,16 @@ export function EventCard({ event, username }: EventCardProps) {
                 {event.schedulingType === 'GROUP' ? 'Group Event' : '1-on-1'}
               </Badge>
 
-              <span className="text-xs text-slate-400 font-medium flex items-center gap-1">
-                <Video className="h-3.5 w-3.5 text-slate-400" />
-                <span>{event.locationType === 'GOOGLE_MEET' ? 'Google Meet' : event.locationType}</span>
-              </span>
+              {(() => {
+                const meta = getProviderMeta(event.locationType || 'GOOGLE_MEET');
+                const IconComp = meta.category === 'phone' ? Phone : meta.category === 'in_person' ? MapPin : Video;
+                return (
+                  <span className="text-xs text-slate-500 dark:text-slate-400 font-medium flex items-center gap-1.5">
+                    <IconComp className="h-3.5 w-3.5 text-slate-400" />
+                    <span>{meta.name}</span>
+                  </span>
+                );
+              })()}
             </div>
 
             {/* Description */}

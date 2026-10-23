@@ -33,7 +33,10 @@ import {
   CalendarDays,
   Send,
   Users,
+  Phone,
+  MapPin,
 } from 'lucide-react';
+import { getProviderMeta } from '@/lib/meeting-providers';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -751,20 +754,25 @@ export function BookingsView({
                         </Badge>
                       </td>
 
-                      {/* Video Link */}
+                      {/* Video / Location Link */}
                       <td className="py-3.5 px-4 whitespace-nowrap">
-                        {b.meetingUrl ? (
-                          <a
-                            href={b.meetingUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-1 text-brand-600 dark:text-brand-400 font-bold hover:underline"
-                          >
-                            <Video className="h-3.5 w-3.5" />
-                            <span>Join Meet</span>
-                          </a>
-                        ) : (
+                        {b.meetingUrl ? (() => {
+                          const pMeta = getProviderMeta(b.locationType || b.eventType?.locationType || 'GOOGLE_MEET');
+                          const IconComp = pMeta.category === 'phone' ? Phone : pMeta.category === 'in_person' ? MapPin : Video;
+                          const label = pMeta.category === 'in_person' ? 'Map' : pMeta.category === 'phone' ? 'Call' : pMeta.name.split(' ')[0];
+                          return (
+                            <a
+                              href={b.meetingUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
+                              className="inline-flex items-center gap-1.5 text-brand-600 dark:text-brand-400 font-bold hover:underline text-xs"
+                            >
+                              <IconComp className="h-3.5 w-3.5" />
+                              <span>Join {label}</span>
+                            </a>
+                          );
+                        })() : (
                           <span className="text-slate-400 text-[11px]">No link</span>
                         )}
                       </td>
@@ -948,26 +956,47 @@ export function BookingsView({
                 </div>
               </div>
 
-              {/* Google Meet Link Button */}
-              {selectedBookingForDrawer.meetingUrl && (
-                <div className="space-y-1.5">
-                  <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
-                    Video Conference
-                  </p>
-                  <a
-                    href={selectedBookingForDrawer.meetingUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-brand-50 to-indigo-50/50 dark:from-brand-950/40 dark:to-indigo-950/20 border border-brand-200/80 dark:border-brand-800 text-brand-700 dark:text-brand-300 font-bold text-xs hover:scale-[1.01] transition-transform shadow-xs"
-                  >
-                    <div className="flex items-center gap-2">
-                      <Video className="h-4 w-4 text-brand-600" />
-                      <span>Join via Google Meet</span>
+              {/* Meeting Link & Conferencing Card */}
+              {selectedBookingForDrawer.meetingUrl && (() => {
+                const drawerMeta = getProviderMeta(selectedBookingForDrawer.locationType || selectedBookingForDrawer.eventType?.locationType || 'GOOGLE_MEET');
+                const DrawerIcon = drawerMeta.category === 'phone' ? Phone : drawerMeta.category === 'in_person' ? MapPin : Video;
+                const dDetails = selectedBookingForDrawer.locationDetails || {};
+
+                return (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                        {drawerMeta.name}
+                      </p>
+                      <Badge variant="outline" className={`text-[10px] font-bold px-2 py-0.5 rounded-md border-0 ${drawerMeta.badgeBg} ${drawerMeta.badgeText}`}>
+                        {drawerMeta.category.toUpperCase()}
+                      </Badge>
                     </div>
-                    <ExternalLink className="h-4 w-4" />
-                  </a>
-                </div>
-              )}
+
+                    <a
+                      href={selectedBookingForDrawer.meetingUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center justify-between p-3.5 rounded-2xl bg-gradient-to-r from-brand-50 to-indigo-50/50 dark:from-brand-950/40 dark:to-indigo-950/20 border border-brand-200/80 dark:border-brand-800 text-brand-700 dark:text-brand-300 font-bold text-xs hover:scale-[1.01] transition-transform shadow-xs"
+                    >
+                      <div className="flex items-center gap-2">
+                        <DrawerIcon className="h-4 w-4 text-brand-600" />
+                        <span>{drawerMeta.joinButtonText}</span>
+                      </div>
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+
+                    {(dDetails.meetingId || dDetails.passcode || dDetails.dialIn || dDetails.address) && (
+                      <div className="p-3 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/60 dark:border-slate-800 text-xs space-y-1 text-slate-600 dark:text-slate-300">
+                        {dDetails.meetingId && <div><span className="text-slate-400 font-bold">Meeting ID:</span> <span className="font-mono">{dDetails.meetingId}</span></div>}
+                        {dDetails.passcode && <div><span className="text-slate-400 font-bold">Passcode:</span> <span className="font-mono">{dDetails.passcode}</span></div>}
+                        {dDetails.dialIn && <div><span className="text-slate-400 font-bold">Dial-In:</span> {dDetails.dialIn}</div>}
+                        {dDetails.address && <div><span className="text-slate-400 font-bold">Venue:</span> {dDetails.address}</div>}
+                      </div>
+                    )}
+                  </div>
+                );
+              })()}
 
               {/* Meeting Notes */}
               {selectedBookingForDrawer.additionalNotes && (

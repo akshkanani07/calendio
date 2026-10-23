@@ -147,6 +147,8 @@ export function getBookingConfirmationEmailTemplate({
   formattedDateTime,
   timeZone,
   meetingUrl,
+  locationType = 'GOOGLE_MEET',
+  locationDetails,
   notes,
 }: {
   guestName: string;
@@ -155,10 +157,43 @@ export function getBookingConfirmationEmailTemplate({
   formattedDateTime: string;
   timeZone: string;
   meetingUrl?: string | null;
+  locationType?: string;
+  locationDetails?: any;
   notes?: string | null;
 }): { subject: string; html: string; text: string } {
   const subject = `Confirmed: ${eventTitle} with ${hostName} on ${formattedDateTime}`;
-  const text = `Hello ${guestName},\n\nYour meeting "${eventTitle}" with ${hostName} has been confirmed for ${formattedDateTime} (${timeZone}).\n\n${meetingUrl ? 'Join Meeting: ' + meetingUrl : ''}\n\nThank you,\nCalendio Team`;
+  const text = `Hello ${guestName},\n\nYour meeting "${eventTitle}" with ${hostName} has been confirmed for ${formattedDateTime} (${timeZone}).\n\n${meetingUrl ? 'Join / Location: ' + meetingUrl : ''}\n\nThank you,\nCalendio Team`;
+
+  const getButtonText = () => {
+    switch (locationType) {
+      case 'ZOOM': return 'Join Zoom Meeting';
+      case 'MS_TEAMS': return 'Join Microsoft Teams';
+      case 'MS_TEAMS_PERSONAL': return 'Join Teams Personal';
+      case 'WEBEX': return 'Join Webex Meeting';
+      case 'GOTO_MEETING': return 'Join GoTo Meeting';
+      case 'AROUND': return 'Join Around Video';
+      case 'WHEREBY': return 'Join Whereby Room';
+      case 'PHONE_CALL': return 'Call Phone Number';
+      case 'IN_PERSON': return 'View Location on Google Maps';
+      case 'CUSTOM': return 'Join Custom Meeting';
+      default: return 'Join Google Meet';
+    }
+  };
+
+  const getButtonBg = () => {
+    switch (locationType) {
+      case 'ZOOM': return '#2D8CFF';
+      case 'MS_TEAMS':
+      case 'MS_TEAMS_PERSONAL': return '#5B5FC7';
+      case 'WEBEX': return '#00BCEB';
+      case 'GOTO_MEETING': return '#FF6F00';
+      case 'AROUND': return '#5E35B1';
+      case 'WHEREBY': return '#005555';
+      case 'PHONE_CALL': return '#10B981';
+      case 'IN_PERSON': return '#EA580C';
+      default: return '#0069ff';
+    }
+  };
 
   const html = `
 <!DOCTYPE html>
@@ -212,10 +247,19 @@ export function getBookingConfirmationEmailTemplate({
                 ` : ''}
               </table>
               ${meetingUrl ? `
-              <div style="text-align: center; margin-bottom: 24px;">
-                <a href="${meetingUrl}" style="background-color: #0069ff; color: #ffffff; padding: 14px 28px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 10px; display: inline-block;">
-                  Join Google Meet
+              <div style="text-align: center; margin-bottom: 20px;">
+                <a href="${meetingUrl}" style="background-color: ${getButtonBg()}; color: #ffffff; padding: 14px 28px; font-size: 14px; font-weight: 700; text-decoration: none; border-radius: 10px; display: inline-block;">
+                  ${getButtonText()}
                 </a>
+              </div>
+              ` : ''}
+              ${(locationDetails?.meetingId || locationDetails?.passcode || locationDetails?.dialIn || locationDetails?.address) ? `
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 12px; color: #475569;">
+                <strong style="color: #1e293b; display: block; margin-bottom: 4px;">Meeting Credentials / Details:</strong>
+                ${locationDetails.meetingId ? `<div><strong>ID / Access Code:</strong> ${locationDetails.meetingId}</div>` : ''}
+                ${locationDetails.passcode ? `<div><strong>Passcode:</strong> ${locationDetails.passcode}</div>` : ''}
+                ${locationDetails.dialIn ? `<div><strong>Dial-in:</strong> ${locationDetails.dialIn}</div>` : ''}
+                ${locationDetails.address ? `<div><strong>Address:</strong> ${locationDetails.address}</div>` : ''}
               </div>
               ` : ''}
               ${notes ? `
@@ -253,6 +297,8 @@ export function getHostBookingNotificationTemplate({
   formattedDateTime,
   timeZone,
   meetingUrl,
+  locationType = 'GOOGLE_MEET',
+  locationDetails,
   notes,
 }: {
   hostName: string;
@@ -262,10 +308,28 @@ export function getHostBookingNotificationTemplate({
   formattedDateTime: string;
   timeZone: string;
   meetingUrl?: string | null;
+  locationType?: string;
+  locationDetails?: any;
   notes?: string | null;
 }): { subject: string; html: string; text: string } {
   const subject = `New Event: ${guestName} - ${eventTitle} on ${formattedDateTime}`;
-  const text = `Hello ${hostName},\n\n${guestName} (${guestEmail}) has booked: "${eventTitle}" on ${formattedDateTime} (${timeZone}).\n\n${meetingUrl ? 'Meeting URL: ' + meetingUrl : ''}\n\nCalendio Team`;
+  const text = `Hello ${hostName},\n\n${guestName} (${guestEmail}) has booked: "${eventTitle}" on ${formattedDateTime} (${timeZone}).\n\n${meetingUrl ? 'Meeting URL / Location: ' + meetingUrl : ''}\n\nCalendio Team`;
+
+  const getProviderName = () => {
+    switch (locationType) {
+      case 'ZOOM': return 'Zoom Video';
+      case 'MS_TEAMS': return 'Microsoft Teams';
+      case 'MS_TEAMS_PERSONAL': return 'Microsoft Teams (Personal)';
+      case 'WEBEX': return 'Cisco Webex';
+      case 'GOTO_MEETING': return 'GoTo Meeting';
+      case 'AROUND': return 'Around Video';
+      case 'WHEREBY': return 'Whereby Room';
+      case 'PHONE_CALL': return 'Phone Call';
+      case 'IN_PERSON': return 'In-Person Meeting';
+      case 'CUSTOM': return 'Custom Meeting Link';
+      default: return 'Google Meet';
+    }
+  };
 
   const html = `
 <!DOCTYPE html>
@@ -302,15 +366,28 @@ export function getHostBookingNotificationTemplate({
                   <td style="padding: 6px 0; font-size: 13px; color: #64748b;">Guest:</td>
                   <td style="padding: 6px 0; font-size: 14px; color: #334155;">${guestName} (${guestEmail})</td>
                 </tr>
+                <tr>
+                  <td style="padding: 6px 0; font-size: 13px; color: #64748b;">Provider:</td>
+                  <td style="padding: 6px 0; font-size: 14px; font-weight: 600; color: #0f172a;">${getProviderName()}</td>
+                </tr>
                 ${meetingUrl ? `
                 <tr>
-                  <td style="padding: 6px 0; font-size: 13px; color: #64748b;">Meeting URL:</td>
-                  <td style="padding: 6px 0; font-size: 14px; color: #0069ff;">
+                  <td style="padding: 6px 0; font-size: 13px; color: #64748b;">Join Link:</td>
+                  <td style="padding: 6px 0; font-size: 14px; color: #0069ff; word-break: break-all;">
                     <a href="${meetingUrl}" style="color: #0069ff;">${meetingUrl}</a>
                   </td>
                 </tr>
                 ` : ''}
               </table>
+              ${(locationDetails?.meetingId || locationDetails?.passcode || locationDetails?.dialIn || locationDetails?.address) ? `
+              <div style="background-color: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; font-size: 12px; color: #475569;">
+                <strong style="color: #1e293b; display: block; margin-bottom: 4px;">Meeting Credentials / Details:</strong>
+                ${locationDetails.meetingId ? `<div><strong>ID / Access Code:</strong> ${locationDetails.meetingId}</div>` : ''}
+                ${locationDetails.passcode ? `<div><strong>Passcode:</strong> ${locationDetails.passcode}</div>` : ''}
+                ${locationDetails.dialIn ? `<div><strong>Dial-in:</strong> ${locationDetails.dialIn}</div>` : ''}
+                ${locationDetails.address ? `<div><strong>Address:</strong> ${locationDetails.address}</div>` : ''}
+              </div>
+              ` : ''}
               ${notes ? `
               <div style="background-color: #f1f5f9; border-radius: 8px; padding: 12px 16px; margin-bottom: 20px;">
                 <span style="font-size: 12px; font-weight: 600; color: #475569;">Guest Notes:</span>
