@@ -176,7 +176,19 @@ export function BookingFlow({ host, eventType }: BookingFlowProps) {
       });
 
       if (result.success && result.slots) {
-        setSlots(result.slots);
+        const normalized = result.slots.map((s: any, idx: number) => {
+          const sTime = s.startTime || s.isoStart;
+          const eTime = s.endTime || s.isoEnd;
+          return {
+            ...s,
+            startTime: sTime,
+            endTime: eTime,
+            isoStart: s.isoStart || sTime,
+            isoEnd: s.isoEnd || eTime,
+            key: s.isoStart || sTime || s.time || `slot-${idx}`,
+          };
+        });
+        setSlots(normalized);
       } else {
         setSlots([]);
       }
@@ -197,19 +209,32 @@ export function BookingFlow({ host, eventType }: BookingFlowProps) {
   }, [today, guestTimeZone]);
 
   // Format slot time based on 12h / 24h preference
-  const formatSlotTime = (dateObj: Date | string) => {
-    const d = new Date(dateObj);
-    if (timeFormat === '24h') {
-      return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+  const formatSlotTime = (slotItem: any) => {
+    if (!slotItem) return '';
+    if (typeof slotItem === 'object' && slotItem.formatted && timeFormat !== '24h') {
+      return slotItem.formatted;
     }
-    return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+    const rawVal = typeof slotItem === 'string' ? slotItem : slotItem.startTime || slotItem.isoStart;
+    if (rawVal) {
+      const d = new Date(rawVal);
+      if (!isNaN(d.getTime())) {
+        if (timeFormat === '24h') {
+          return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
+        }
+        return d.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit', hour12: true });
+      }
+    }
+    return typeof slotItem === 'object' && slotItem.time ? slotItem.time : String(slotItem);
   };
 
   // Filter slots by morning, afternoon, evening
   const filteredSlots = useMemo(() => {
     if (timeOfDayFilter === 'all') return slots;
     return slots.filter((slot) => {
-      const hour = new Date(slot.startTime).getHours();
+      const timeVal = slot.startTime || slot.isoStart;
+      if (!timeVal) return true;
+      const hour = new Date(timeVal).getHours();
+      if (isNaN(hour)) return true;
       if (timeOfDayFilter === 'morning') return hour < 12;
       if (timeOfDayFilter === 'afternoon') return hour >= 12 && hour < 17;
       if (timeOfDayFilter === 'evening') return hour >= 17;
@@ -223,10 +248,15 @@ export function BookingFlow({ host, eventType }: BookingFlowProps) {
     let afternoon = 0;
     let evening = 0;
     slots.forEach((s) => {
-      const hour = new Date(s.startTime).getHours();
-      if (hour < 12) morning++;
-      else if (hour < 17) afternoon++;
-      else evening++;
+      const timeVal = s.startTime || s.isoStart;
+      if (timeVal) {
+        const hour = new Date(timeVal).getHours();
+        if (!isNaN(hour)) {
+          if (hour < 12) morning++;
+          else if (hour < 17) afternoon++;
+          else evening++;
+        }
+      }
     });
     return { all: slots.length, morning, afternoon, evening };
   }, [slots]);
@@ -265,8 +295,8 @@ export function BookingFlow({ host, eventType }: BookingFlowProps) {
       const res = await createPublicBooking({
         hostId: host.id,
         eventTypeId: eventType.id,
-        isoStart: new Date(selectedSlot.startTime).toISOString(),
-        isoEnd: new Date(selectedSlot.endTime).toISOString(),
+        isoStart: new Date(selectedSlot.startTime || selectedSlot.isoStart).toISOString(),
+        isoEnd: new Date(selectedSlot.endTime || selectedSlot.isoEnd).toISOString(),
         guestName,
         guestEmail,
         guestTimeZone,
@@ -665,13 +695,23 @@ export function BookingFlow({ host, eventType }: BookingFlowProps) {
                       </p>
                     </div>
                   ) : (
-                    filteredSlots.map((slot) => {
+                    filteredSlots.map((slot, index) => {
+                      const slotKey =
+                        slot.key ||
+                        slot.isoStart ||
+                        slot.startTime ||
+                        slot.time ||
+                        `slot-${index}`;
+
                       const isChosen =
-                        selectedSlot && selectedSlot.startTime === slot.startTime;
+                        selectedSlot &&
+                        ((slot.isoStart && selectedSlot.isoStart === slot.isoStart) ||
+                         (slot.startTime && selectedSlot.startTime === slot.startTime) ||
+                         (slot.time && selectedSlot.time === slot.time));
 
                       return (
                         <div
-                          key={slot.startTime}
+                          key={slotKey}
                           className="flex items-center gap-2 animate-in fade-in duration-150"
                         >
                           <button
@@ -684,7 +724,7 @@ export function BookingFlow({ host, eventType }: BookingFlowProps) {
                                 : 'bg-white dark:bg-slate-800/80 border-slate-200 dark:border-slate-700 hover:border-brand-500 text-slate-800 dark:text-slate-200 hover:bg-brand-50/50 dark:hover:bg-brand-950/30'
                             )}
                           >
-                            <span>{formatSlotTime(slot.startTime)}</span>
+                            <span>{formatSlotTime(slot)}</span>
                           </button>
 
                           {/* "Next" Confirm button pops out once slot is chosen */}

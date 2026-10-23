@@ -179,7 +179,14 @@ export async function getAvailableSlotsForDate({
     const now = new Date();
     const minNoticeTime = new Date(now.getTime() + minNoticeHours * 60 * 60 * 1000);
 
-    const availableSlots: { time: string; formatted: string; isoStart: string; isoEnd: string }[] = [];
+    const availableSlots: {
+      time: string;
+      formatted: string;
+      isoStart: string;
+      isoEnd: string;
+      startTime?: string;
+      endTime?: string;
+    }[] = [];
 
     // Step by eventDuration or 30 mins
     const step = eventDuration <= 30 ? 30 : 30;
@@ -219,6 +226,8 @@ export async function getAvailableSlotsForDate({
             formatted,
             isoStart: slotStart.toISOString(),
             isoEnd: slotEnd.toISOString(),
+            startTime: slotStart.toISOString(),
+            endTime: slotEnd.toISOString(),
           });
         }
       }
