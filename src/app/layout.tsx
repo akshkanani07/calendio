@@ -4,6 +4,8 @@ import './globals.css';
 import { AuthProvider } from '@/components/shared/auth-provider';
 import { ThemeProvider } from '@/components/shared/theme-provider';
 import { PwaInstaller } from '@/components/shared/pwa-installer';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -53,6 +55,8 @@ export default function RootLayout({
           <ThemeProvider>
             {children}
             <PwaInstaller />
+            <Analytics />
+            <SpeedInsights />
           </ThemeProvider>
         </AuthProvider>
       </body>
