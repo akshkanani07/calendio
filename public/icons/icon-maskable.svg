@@ -1,0 +1,37 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="calendio-grad-pwa" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0069FF" />
+      <stop offset="50%" stop-color="#2563EB" />
+      <stop offset="100%" stop-color="#4F46E5" />
+    </linearGradient>
+    <linearGradient id="calendio-glare-pwa" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.32" />
+      <stop offset="100%" stop-color="#FFFFFF" stop-opacity="0" />
+    </linearGradient>
+    <filter id="pwa-shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="16" stdDeviation="24" flood-color="#0069FF" flood-opacity="0.35"/>
+    </filter>
+  </defs>
+
+  <rect x="32" y="32" width="448" height="448" rx="136" fill="url(#calendio-grad-pwa)" filter="url(#pwa-shadow)"/>
+  <rect x="32" y="32" width="448" height="448" rx="136" stroke="rgba(255, 255, 255, 0.28)" stroke-width="12"/>
+  <rect x="32" y="32" width="448" height="448" rx="136" fill="url(#calendio-glare-pwa)"/>
+
+  <rect x="118" y="140" width="276" height="252" rx="44" fill="#FFFFFF" fill-opacity="0.98"/>
+  <path d="M 118 184 C 118 159.6 137.6 140 162 140 L 350 140 C 374.4 140 394 159.6 394 184 L 394 216 L 118 216 Z" fill="#0069FF"/>
+
+  <rect x="170" y="108" width="30" height="56" rx="15" fill="#FFFFFF"/>
+  <rect x="175" y="114" width="20" height="44" rx="10" fill="#1D4ED8"/>
+
+  <rect x="312" y="108" width="30" height="56" rx="15" fill="#FFFFFF"/>
+  <rect x="317" y="114" width="20" height="44" rx="10" fill="#1D4ED8"/>
+
+  <circle cx="180" cy="268" r="16" fill="#0069FF"/>
+  <circle cx="256" cy="268" r="16" fill="#94A3B8"/>
+  <circle cx="332" cy="268" r="16" fill="#94A3B8"/>
+
+  <circle cx="180" cy="336" r="16" fill="#94A3B8"/>
+  <circle cx="256" cy="336" r="19" fill="#10B981"/>
+  <circle cx="332" cy="336" r="16" fill="#94A3B8"/>
+</svg>
