@@ -78,24 +78,41 @@ export function MasterDashboardOverview({
     return upcomingBookings[0];
   }, [upcomingBookings]);
 
-  // Compute Live Clock & Greeting
+  // Compute Live Clock & Greeting according to user.timeZone
   useEffect(() => {
+    const tz = user.timeZone || 'Asia/Kolkata';
     const updateTime = () => {
       const now = new Date();
-      const hour = now.getHours();
-      if (hour < 12) setGreeting('Good morning');
-      else if (hour < 17) setGreeting('Good afternoon');
-      else setGreeting('Good evening');
+      try {
+        const hourFormatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          hour: 'numeric',
+          hour12: false,
+        });
+        const hour = parseInt(hourFormatter.format(now), 10);
+        if (hour < 12) setGreeting('Good morning');
+        else if (hour < 17) setGreeting('Good afternoon');
+        else setGreeting('Good evening');
 
-      setCurrentTimeStr(
-        now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
-      );
+        const timeFormatter = new Intl.DateTimeFormat('en-US', {
+          timeZone: tz,
+          hour: '2-digit',
+          minute: '2-digit',
+          second: '2-digit',
+          hour12: true,
+        });
+        setCurrentTimeStr(timeFormatter.format(now));
+      } catch (e) {
+        setCurrentTimeStr(
+          now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+        );
+      }
     };
 
     updateTime();
     const interval = setInterval(updateTime, 1000);
     return () => clearInterval(interval);
-  }, []);
+  }, [user.timeZone]);
 
   const cleanUsername = user.username || 'me';
   const publicProfileUrl = typeof window !== 'undefined'
@@ -418,6 +435,7 @@ export function MasterDashboardOverview({
                     <Calendar className="w-3.5 h-3.5 text-brand-500" />
                     <span>
                       {new Date(nextBooking.startTime).toLocaleDateString([], {
+                        timeZone: user.timeZone || undefined,
                         weekday: 'short',
                         month: 'short',
                         day: 'numeric',
@@ -427,6 +445,7 @@ export function MasterDashboardOverview({
                     <Clock className="w-3.5 h-3.5 text-brand-500" />
                     <span>
                       {new Date(nextBooking.startTime).toLocaleTimeString([], {
+                        timeZone: user.timeZone || undefined,
                         hour: 'numeric',
                         minute: '2-digit',
                         hour12: true,
